@@ -184,108 +184,100 @@
         <p style="text-align:center; color:#777;">Menü yükleniyor...</p>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBz2YSZx5wBCs9eM4FCqxovO4rHhqworBw",
-            authDomain: "deer-valley-palm-beach.firebaseapp.com",
-            databaseURL: "https://deer-valley-palm-beach-default-rtdb.firebaseio.com",
-            projectId: "deer-valley-palm-beach",
-            storageBucket: "deer-valley-palm-beach.firebasestorage.app",
-            messagingSenderId: "1044470367747",
-            appId: "1:1044470367747:web:b18af2195cf35c3856f036",
-            measurementId: "G-1MNYDFTSRJ"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        // onValue kullanarak veritabanındaki değişiklikleri anlık dinliyoruz ve takılma riskini ortadan kaldırıyoruz
-        const menuRef = ref(db, 'menu');
-        
-        onValue(menuRef, (snapshot) => {
+    <script>
+        async function loadMenu() {
             const navContainer = document.getElementById('category-nav');
             const contentContainer = document.getElementById('menu-sections-container');
-            
-            navContainer.innerHTML = '';
-            contentContainer.innerHTML = '';
 
-            if (!snapshot.exists()) {
-                contentContainer.innerHTML = '<p style="text-align:center; color:#777;">Henüz menü içeriği eklenmemiş.</p>';
-                return;
-            }
-
-            const rawData = snapshot.val();
-            let categories = [];
-
-            if (Array.isArray(rawData)) {
-                categories = rawData.filter(item => item !== null && item !== undefined);
-            } else if (typeof rawData === 'object') {
-                categories = Object.values(rawData).filter(item => item !== null && item !== undefined);
-            }
-
-            if (categories.length === 0) {
-                contentContainer.innerHTML = '<p style="text-align:center; color:#777;">Gösterilecek kategori bulunamadı.</p>';
-                return;
-            }
-
-            let isFirst = true;
-
-            categories.forEach((category, index) => {
-                const catName = category.name || category.kategoriAdi || `Kategori ${index + 1}`;
-                const catId = `cat-${index}`;
+            try {
+                // Doğrudan Firebase REST API üzerinden veriyi çekiyoruz (Modül/SDK çakışmalarını tamamen önler)
+                const response = await fetch('https://deer-valley-palm-beach-default-rtdb.firebaseio.com/menu.json');
                 
-                // Sekme Butonu Oluşturma
-                const btn = document.createElement('button');
-                btn.className = `cat-btn ${isFirst ? 'active' : ''}`;
-                btn.textContent = catName;
-                btn.onclick = () => {
-                    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    document.getElementById(catId).scrollIntoView({ behavior: 'smooth', block: 'start' });
-                };
-                navContainer.appendChild(btn);
+                if (!response.ok) {
+                    throw new Error('Veritabanına ulaşılamadı.');
+                }
 
-                // Ürün Listesi Bölümü
-                const section = document.createElement('div');
-                section.className = 'menu-category-section';
-                section.id = catId;
-
-                let itemsHtml = `<h2 class="menu-category-title">${catName}</h2><div class="menu-items-grid">`;
+                const rawData = await response.json();
                 
-                if (category.items) {
-                    let items = [];
-                    if (Array.isArray(category.items)) {
-                        items = category.items.filter(i => i !== null && i !== undefined);
-                    } else if (typeof category.items === 'object') {
-                        items = Object.values(category.items).filter(i => i !== null && i !== undefined);
+                navContainer.innerHTML = '';
+                contentContainer.innerHTML = '';
+
+                if (!rawData) {
+                    contentContainer.innerHTML = '<p style="text-align:center; color:#777;">Henüz menü içeriği eklenmemiş.</p>';
+                    return;
+                }
+
+                let categories = [];
+                if (Array.isArray(rawData)) {
+                    categories = rawData.filter(item => item !== null && item !== undefined);
+                } else if (typeof rawData === 'object') {
+                    categories = Object.values(rawData).filter(item => item !== null && item !== undefined);
+                }
+
+                if (categories.length === 0) {
+                    contentContainer.innerHTML = '<p style="text-align:center; color:#777;">Gösterilecek kategori bulunamadı.</p>';
+                    return;
+                }
+
+                let isFirst = true;
+
+                categories.forEach((category, index) => {
+                    const catName = category.name || category.kategoriAdi || `Kategori ${index + 1}`;
+                    const catId = `cat-${index}`;
+                    
+                    // Sekme Butonu
+                    const btn = document.createElement('button');
+                    btn.className = `cat-btn ${isFirst ? 'active' : ''}`;
+                    btn.textContent = catName;
+                    btn.onclick = () => {
+                        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        document.getElementById(catId).scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    };
+                    navContainer.appendChild(btn);
+
+                    // Ürün Listesi Bölümü
+                    const section = document.createElement('div');
+                    section.className = 'menu-category-section';
+                    section.id = catId;
+
+                    let itemsHtml = `<h2 class="menu-category-title">${catName}</h2><div class="menu-items-grid">`;
+                    
+                    if (category.items) {
+                        let items = [];
+                        if (Array.isArray(category.items)) {
+                            items = category.items.filter(i => i !== null && i !== undefined);
+                        } else if (typeof category.items === 'object') {
+                            items = Object.values(category.items).filter(i => i !== null && i !== undefined);
+                        }
+                        
+                        items.forEach(item => {
+                            itemsHtml += `
+                                <div class="menu-item">
+                                    <div class="item-info">
+                                        <div class="item-name">${item.name || item.urunAdi || ''}</div>
+                                        ${item.description || item.aciklama ? `<div class="item-desc">${item.description || item.aciklama}</div>` : ''}
+                                    </div>
+                                    <div class="item-price">₺${item.price || item.fiyat || '0'}</div>
+                                </div>
+                            `;
+                        });
                     }
                     
-                    items.forEach(item => {
-                        itemsHtml += `
-                            <div class="menu-item">
-                                <div class="item-info">
-                                    <div class="item-name">${item.name || item.urunAdi || ''}</div>
-                                    ${item.description || item.aciklama ? `<div class="item-desc">${item.description || item.aciklama}</div>` : ''}
-                                </div>
-                                <div class="item-price">₺${item.price || item.fiyat || '0'}</div>
-                            </div>
-                        `;
-                    });
-                }
-                
-                itemsHtml += `</div>`;
-                section.innerHTML = itemsHtml;
-                contentContainer.appendChild(section);
+                    itemsHtml += `</div>`;
+                    section.innerHTML = itemsHtml;
+                    contentContainer.appendChild(section);
 
-                isFirst = false;
-            });
-        }, (error) => {
-            console.error("Firebase veri okuma hatası:", error);
-            document.getElementById('menu-sections-container').innerHTML = '<p style="text-align:center; color:#ff6b6b;">Menü yüklenirken bir hata oluştu.</p>';
-        });
+                    isFirst = false;
+                });
+
+            } catch (error) {
+                console.error("Menü yükleme hatası:", error);
+                contentContainer.innerHTML = '<p style="text-align:center; color:#ff6b6b;">Menü yüklenirken bir hata oluştu. Lütfen bağlantınızı kontrol edin.</p>';
+            }
+        }
+
+        loadMenu();
     </script>
 </body>
 </html>
