@@ -86,7 +86,8 @@
         <div class="login-box">
             <div class="brand">DEER VALLEY PALM BEACH</div>
             <h1>Yönetim Paneline Giriş</h1>
-            <input type="password" id="login-password" placeholder="Şifre" onkeydown="if(event.key==='Enter') tryLogin()">
+            <input type="text" id="login-username" placeholder="Kullanıcı Adı" autocomplete="username">
+            <input type="password" id="login-password" placeholder="Şifre" autocomplete="current-password" onkeydown="if(event.key==='Enter') tryLogin()">
             <button onclick="tryLogin()">Giriş Yap</button>
             <a href="index.html" class="login-site-link">← Ana Sayfaya (Siteye) Dön</a>
             <div class="login-error" id="login-error"></div>
@@ -168,6 +169,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
+        const ADMIN_USER = "admin";
         const ADMIN_PASSWORD = "deervalley2026";
         const SESSION_KEY = 'dv_admin_session';
 
@@ -179,15 +181,17 @@
         };
 
         window.tryLogin = async function() {
-            const input = document.getElementById('login-password');
+            const userInput = document.getElementById('login-username').value.trim();
+            const passInput = document.getElementById('login-password').value;
             const errorEl = document.getElementById('login-error');
-            if (input.value === ADMIN_PASSWORD) {
+
+            if (userInput === ADMIN_USER && passInput === ADMIN_PASSWORD) {
                 sessionStorage.setItem(SESSION_KEY, '1');
                 await initializePanelData();
                 showPanelUI();
             } else {
-                errorEl.textContent = 'Hatalı şifre, lütfen tekrar deneyin.';
-                input.value = '';
+                errorEl.textContent = 'Hatalı kullanıcı adı veya şifre, lütfen tekrar deneyin.';
+                document.getElementById('login-password').value = '';
             }
         };
 
@@ -195,6 +199,9 @@
             sessionStorage.removeItem(SESSION_KEY);
             document.getElementById('panel').classList.remove('visible');
             document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('login-username').value = '';
+            document.getElementById('login-password').value = '';
+            document.getElementById('login-error').textContent = '';
         };
 
         async function initializePanelData() {
@@ -278,7 +285,7 @@
                 siteData.contact.phone = document.getElementById('contact-phone-input').value;
                 siteData.contact.email = document.getElementById('contact-email-input').value;
             } else if (section === 'menu') {
-                // Menü verileri zaten anlık olarak nesne içinde güncelleniyor
+                // Menü verileri anlık olarak güncelleniyor
             }
 
             try {
