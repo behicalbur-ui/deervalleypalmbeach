@@ -58,7 +58,7 @@
             gap: 10px;
             margin-bottom: 50px;
             position: sticky;
-            top: 55px; /* back-bar yüksekliğine göre ayarlandı */
+            top: 55px;
             z-index: 90;
             background: rgba(15,15,15,0.97);
             padding: 14px 0;
@@ -135,47 +135,53 @@
     </section>
 
     <div class="menu-content">
-        <div id="menu-container"></div>
+        <div id="menu-container">
+            <p style="text-align:center; color:#777; padding:40px;">Menü yükleniyor...</p>
+        </div>
     </div>
 
     <div class="menu-footer">
         <p>Deer Valley Palm Beach &middot; <a href="index.html">Ana Sayfa</a></p>
     </div>
 
-    <script>
-        const STORAGE_KEY = 'deer_valley_site_data';
+    <!-- Firebase SDK ve Menü Render Mantığı -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-        const defaultMenuData = {
-            categories: [
-                {
-                    id: "baslangiclar",
-                    name: "Başlangıçlar",
-                    items: [
-                        { name: "Zeytinyağlı Enginar", description: "Taze otlarla servis edilen zeytinyağlı enginar.", price: 250, discountPercent: 0, active: true }
-                    ]
-                }
-            ]
+        const firebaseConfig = {
+            apiKey: "AIzaSyBz2YSZx5wBCs9eM4FCqxovO4rHhqworBw",
+            authDomain: "deer-valley-palm-beach.firebaseapp.com",
+            databaseURL: "https://deer-valley-palm-beach-default-rtdb.firebaseio.com",
+            projectId: "deer-valley-palm-beach",
+            storageBucket: "deer-valley-palm-beach.firebasestorage.app",
+            messagingSenderId: "1044470367747",
+            appId: "1:1044470367747:web:b18af2195cf35c3856f036",
+            measurementId: "G-1MNYDFTSRJ"
         };
 
-        function renderMenu() {
-            const savedData = localStorage.getItem(STORAGE_KEY);
-            let menuData = defaultMenuData;
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-            if (savedData) {
-                try {
-                    const parsed = JSON.parse(savedData);
-                    if (parsed && parsed.menu && parsed.menu.categories) {
-                        menuData = parsed.menu;
-                    }
-                } catch(e) {
-                    console.error("Menü verisi okunamadı:", e);
+        async function loadMenuFromFirebase() {
+            try {
+                const snapshot = await get(ref(db, 'siteData/menu'));
+                if (snapshot.exists()) {
+                    renderMenu(snapshot.val());
+                } else {
+                    document.getElementById('menu-container').innerHTML = '<p style="text-align:center; color:#777; padding:40px;">Henüz menü içeriği eklenmemiş.</p>';
                 }
+            } catch (error) {
+                console.error("Firebase'den menü yüklenirken hata:", error);
+                document.getElementById('menu-container').innerHTML = '<p style="text-align:center; color:#e06565; padding:40px;">Menü yüklenirken bir sorun oluştu.</p>';
             }
+        }
 
+        function renderMenu(menuData) {
             let navHtml = '<nav class="menu-nav" id="menuNav">';
             let contentHtml = '';
 
-            if (menuData.categories && menuData.categories.length > 0) {
+            if (menuData && menuData.categories && menuData.categories.length > 0) {
                 menuData.categories.forEach(category => {
                     const catId = category.id || 'cat-' + Math.random().toString(36).substring(2, 7);
                     navHtml += `<a href="#${catId}" class="nav-link" data-target="${catId}">${category.name}</a>`;
@@ -190,7 +196,7 @@
                         category.items.forEach(item => {
                             if (item.active !== false) {
                                 const originalPrice = Number(item.price) || 0;
-                                const discountPercent = Number(item.discountPercent || item.discount || item.indirim || 0);
+                                const discountPercent = Number(item.discountPercent || 0);
                                 
                                 let priceHtml = '';
                                 if (discountPercent > 0) {
@@ -222,7 +228,7 @@
             navHtml += '</nav>';
             document.getElementById('menu-container').innerHTML = navHtml + contentHtml;
 
-            // Dinamik Kaydırma Hesaplaması (Sabit barların altında asla kalmaz)
+            // Dinamik Kaydırma Hesaplaması
             document.querySelectorAll('.nav-link').forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -232,7 +238,6 @@
                     if (targetElement) {
                         const backBarHeight = document.getElementById('backBar').offsetHeight;
                         const menuNavHeight = document.getElementById('menuNav').offsetHeight;
-                        // Üstteki tüm sabit alanların toplam yüksekliği + ekstra pay
                         const totalOffset = backBarHeight + menuNavHeight + 20; 
 
                         const elementPosition = targetElement.getBoundingClientRect().top;
@@ -243,7 +248,6 @@
                             behavior: 'smooth'
                         });
 
-                        // Aktif sınıfını güncelle
                         document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
                         this.classList.add('active');
                     }
@@ -251,7 +255,7 @@
             });
         }
 
-        document.addEventListener('DOMContentLoaded', renderMenu);
+        document.addEventListener('DOMContentLoaded', loadMenuFromFirebase);
     </script>
 </body>
 </html>
