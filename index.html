@@ -266,7 +266,7 @@
             margin-bottom: 5px;
         }
 
-        /* İletişim Butonları Tasarımı (İkisi de Beyaz Dolgulu) */
+        /* İletişim Butonları Tasarımı */
         .contact-action-buttons {
             display: flex;
             gap: 12px;
@@ -300,7 +300,6 @@
             height: 550px;
             border: 0;
             border-radius: 8px;
-            /* Haritayı sitenin koyu temasına uyumlu hale getiren filtreler */
             filter: invert(90%) hue-rotate(180deg) contrast(110%) brightness(90%);
         }
         
@@ -315,30 +314,14 @@
 
         /* Mobil Uyum */
         @media (max-width: 900px) {
-            header {
-                padding: 10px 20px;
-            }
-            .logo img {
-                height: 45px;
-            }
-            .container {
-                padding: 0 15px;
-            }
-            .footer-grid {
-                grid-template-columns: 1fr;
-            }
-            .footer-map iframe {
-                height: 400px;
-            }
-            .menu-toggle {
-                display: block;
-            }
-            .contact-action-buttons {
-                flex-direction: column;
-            }
-            .action-btn {
-                width: 100%;
-            }
+            header { padding: 10px 20px; }
+            .logo img { height: 45px; }
+            .container { padding: 0 15px; }
+            .footer-grid { grid-template-columns: 1fr; }
+            .footer-map iframe { height: 400px; }
+            .menu-toggle { display: block; }
+            .contact-action-buttons { flex-direction: column; }
+            .action-btn { width: 100%; }
             nav {
                 position: fixed;
                 top: 0;
@@ -351,29 +334,17 @@
                 transition: right 0.3s ease;
                 padding-top: 90px;
             }
-            nav.open {
-                right: 0;
-            }
+            nav.open { right: 0; }
             nav ul {
                 display: flex;
                 flex-direction: column;
                 gap: 0;
                 padding: 0 30px;
             }
-            nav ul li {
-                border-bottom: 1px solid rgba(255,255,255,0.05);
-            }
-            nav ul li a {
-                display: block;
-                padding: 18px 0;
-                font-size: 15px;
-            }
-            .hero h1 {
-                font-size: 22px;
-            }
-            .reservation-container {
-                padding: 20px;
-            }
+            nav ul li { border-bottom: 1px solid rgba(255,255,255,0.05); }
+            nav ul li a { display: block; padding: 18px 0; font-size: 15px; }
+            .hero h1 { font-size: 22px; }
+            .reservation-container { padding: 20px; }
         }
     </style>
 </head>
@@ -499,7 +470,6 @@
                     <p><strong>Telefon:</strong> <span id="site-phone">+90 541 971 00 14</span></p>
                     <p><strong>E-posta:</strong> <span id="site-email">bilgi@deervalleypalmbeach.com</span></p>
 
-                    <!-- İki Buton da Beyaz Dolgulu -->
                     <div class="contact-action-buttons">
                         <a href="tel:+905419710014" class="action-btn">
                             📞 Bizi Arayın
@@ -519,41 +489,37 @@
         </div>
     </footer>
 
-    <!-- Scriptler -->
-    <script>
-        // Mobil menü aç/kapat
-        function toggleMenu() {
-            document.getElementById('main-nav').classList.toggle('open');
-            document.getElementById('menu-toggle').classList.toggle('open');
-        }
-        function closeMenu() {
-            document.getElementById('main-nav').classList.remove('open');
-            document.getElementById('menu-toggle').classList.remove('open');
-        }
+    <!-- Firebase SDK & Veri Senkronizasyonu -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-        // Admin Panelinden (localStorage) Verileri Çekme ve Yansıtma
-        window.addEventListener('DOMContentLoaded', () => {
-            const STORAGE_KEY = 'deer_valley_site_data';
-            const savedData = localStorage.getItem(STORAGE_KEY);
+        const firebaseConfig = {
+            apiKey: "AIzaSyBz2YSZx5wBCs9eM4FCqxovO4rHhqworBw",
+            authDomain: "deer-valley-palm-beach.firebaseapp.com",
+            databaseURL: "https://deer-valley-palm-beach-default-rtdb.firebaseio.com",
+            projectId: "deer-valley-palm-beach",
+            storageBucket: "deer-valley-palm-beach.firebasestorage.app",
+            messagingSenderId: "1044470367747",
+            appId: "1:1044470367747:web:b18af2195cf35c3856f036",
+            measurementId: "G-1MNYDFTSRJ"
+        };
 
-            if (savedData) {
-                try {
-                    const data = JSON.parse(savedData);
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        async function loadSiteData() {
+            try {
+                const snapshot = await get(ref(db, 'siteData'));
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
                     
                     // İletişim Bilgileri
                     if (data.contact) {
-                        if (document.getElementById('site-address') && data.contact.address) {
-                            document.getElementById('site-address').textContent = data.contact.address;
-                        }
-                        if (document.getElementById('site-hours') && data.contact.hours) {
-                            document.getElementById('site-hours').textContent = data.contact.hours;
-                        }
-                        if (document.getElementById('site-phone') && data.contact.phone) {
-                            document.getElementById('site-phone').textContent = data.contact.phone;
-                        }
-                        if (document.getElementById('site-email') && data.contact.email) {
-                            document.getElementById('site-email').textContent = data.contact.email;
-                        }
+                        if (document.getElementById('site-address') && data.contact.address) document.getElementById('site-address').textContent = data.contact.address;
+                        if (document.getElementById('site-hours') && data.contact.hours) document.getElementById('site-hours').textContent = data.contact.hours;
+                        if (document.getElementById('site-phone') && data.contact.phone) document.getElementById('site-phone').textContent = data.contact.phone;
+                        if (document.getElementById('site-email') && data.contact.email) document.getElementById('site-email').textContent = data.contact.email;
                     }
 
                     // Hero (Giriş) Alanı
@@ -577,13 +543,26 @@
                             document.getElementById('site-story-content').innerHTML = paragraphs.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
                         }
                     }
-                } catch(e) {
-                    console.error("Veriler yüklenirken hata oluştu:", e);
                 }
+            } catch (error) {
+                console.error("Firebase verileri yüklenirken hata oluştu:", error);
             }
-        });
+        }
 
-        // Tarih alanına bugünden itibaren minimum değer ver
+        loadSiteData();
+    </script>
+
+    <!-- Standart Scriptler -->
+    <script>
+        function toggleMenu() {
+            document.getElementById('main-nav').classList.toggle('open');
+            document.getElementById('menu-toggle').classList.toggle('open');
+        }
+        function closeMenu() {
+            document.getElementById('main-nav').classList.remove('open');
+            document.getElementById('menu-toggle').classList.remove('open');
+        }
+
         (function initDate() {
             const dateInput = document.getElementById('res-date');
             const today = new Date();
@@ -595,14 +574,13 @@
             dateInput.value = todayStr;
         })();
 
-        // Saat / dakika açılır menülerini doldur (mekan saatleri 09:00 - 00:00)
         (function initTimeSelects() {
             const hourSelect = document.getElementById('res-hour');
             const minuteSelect = document.getElementById('res-minute');
 
             const hours = [];
             for (let h = 9; h <= 23; h++) hours.push(h);
-            hours.push(0); // gece yarısı
+            hours.push(0);
 
             hours.forEach(h => {
                 const opt = document.createElement('option');
@@ -631,17 +609,10 @@
             const hour = document.getElementById('res-hour').value;
             const minute = document.getElementById('res-minute').value;
 
-            if (!name) {
-                alert('Lütfen isim ve soyisminizi giriniz.');
-                return;
-            }
-            if (!date) {
-                alert('Lütfen bir tarih seçiniz.');
-                return;
-            }
+            if (!name) { alert('Lütfen isim ve soyisminizi giriniz.'); return; }
+            if (!date) { alert('Lütfen bir tarih seçiniz.'); return; }
 
             const time = `${hour}:${minute}`;
-
             const message = `Merhaba, yeni bir rezervasyon talebim var:%0A` +
                             `- İsim Soyisim: ${name}%0A` +
                             `- Kişi Sayısı: ${guests}%0A` +
