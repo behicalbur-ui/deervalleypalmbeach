@@ -53,26 +53,35 @@
 
         .menu-nav {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 8px;
             margin-bottom: 50px;
             position: sticky;
             top: 55px;
             z-index: 90;
             background: rgba(15,15,15,0.97);
-            padding: 14px 0;
+            padding: 14px 16px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
         }
+        
+        /* Kaydırma çubuğunu gizleme */
+        .menu-nav::-webkit-scrollbar { display: none; }
+        .menu-nav { -ms-overflow-style: none; scrollbar-width: none; }
+
         .menu-nav a {
-            font-size: 12px;
+            flex-shrink: 0;
+            font-size: 11px;
             letter-spacing: 1px;
             color: #999;
             text-decoration: none;
-            padding: 8px 16px;
+            padding: 8px 14px;
             border: 1px solid rgba(255,255,255,0.12);
             border-radius: 30px;
             transition: all 0.25s;
             text-transform: uppercase;
+            white-space: nowrap;
         }
         .menu-nav a:hover, .menu-nav a.active { color: #0f0f0f; background: #c9a876; border-color: #c9a876; }
 
@@ -228,7 +237,7 @@
             navHtml += '</nav>';
             document.getElementById('menu-container').innerHTML = navHtml + contentHtml;
 
-            // Dinamik Kaydırma Hesaplaması
+            // Dinamik Kaydırma Hesaplaması ve Yatay Kaydırma Senkronizasyonu
             document.querySelectorAll('.nav-link').forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -250,6 +259,9 @@
 
                         document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
                         this.classList.add('active');
+
+                        // Tıklanan butonu yatay menünün ortasına kaydır
+                        this.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
                     }
                 });
             });
