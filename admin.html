@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yönetim Paneli | Deer Valley Palm Beach</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #121212; color: #ffffff; }
+
+        .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+        .login-box { width: 100%; max-width: 380px; background: #181818; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 36px; text-align: center; }
+        .login-box .brand { font-size: 11px; letter-spacing: 3px; color: #c9a876; margin-bottom: 8px; }
+        .login-box h1 { font-size: 20px; font-weight: 500; margin-bottom: 24px; }
+        .login-box input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 4px; font-size: 14px; margin-bottom: 14px; }
+        .login-box button { width: 100%; background: #c9a876; border: none; color: #121212; padding: 12px; border-radius: 4px; font-weight: 600; font-size: 14px; cursor: pointer; }
+        .login-box button:hover { background: #d9bb8c; }
+        .login-site-link { display: block; margin-top: 14px; font-size: 13px; color: #aaa; text-decoration: none; transition: color 0.3s; }
+        .login-site-link:hover { color: #fff; }
+        .login-error { color: #e06565; font-size: 12px; margin-top: 10px; min-height: 16px; }
+
+        .panel { display: none; min-height: 100vh; }
+        .panel.visible { display: block; }
+
+        .panel-header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(18,18,18,0.97); backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+        }
+        .panel-header .brand { font-size: 11px; letter-spacing: 3px; color: #c9a876; }
+        .panel-header-actions { display: flex; gap: 10px; align-items: center; }
+        .site-link { font-size: 13px; color: #ccc; text-decoration: none; border: 1px solid rgba(255,255,255,0.15); padding: 8px 14px; border-radius: 4px; transition: all 0.3s; }
+        .site-link:hover { background: rgba(255,255,255,0.05); color: #fff; border-color: rgba(255,255,255,0.3); }
+        .logout-btn { background: transparent; border: 1px solid #555; color: #ccc; padding: 8px 16px; border-radius: 4px; font-size: 13px; cursor: pointer; }
+        .logout-btn:hover { border-color: #fff; color: #fff; }
+
+        .tabs { display: flex; gap: 6px; padding: 16px 24px 0; max-width: 900px; margin: 0 auto; flex-wrap: wrap; }
+        .tab-btn { background: #1c1c1c; border: 1px solid #333; color: #999; padding: 10px 18px; border-radius: 6px 6px 0 0; font-size: 13px; cursor: pointer; }
+        .tab-btn.active { background: #181818; color: #c9a876; border-color: #333; border-bottom-color: #181818; }
+
+        .tab-content { max-width: 900px; margin: 0 auto; background: #181818; border: 1px solid #333; border-radius: 0 6px 6px 6px; padding: 32px; margin-bottom: 60px; }
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; }
+
+        .field { margin-bottom: 22px; }
+        .field label { display: block; font-size: 12px; color: #aaa; margin-bottom: 8px; }
+        .field input, .field textarea { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 11px; border-radius: 4px; font-size: 14px; font-family: inherit; }
+        .field textarea { resize: vertical; min-height: 90px; }
+
+        .save-btn { background: #c9a876; border: none; color: #121212; padding: 12px 28px; border-radius: 4px; font-weight: 600; font-size: 14px; cursor: pointer; }
+        .save-btn:hover { background: #d9bb8c; }
+        .save-msg { display: inline-block; margin-left: 14px; font-size: 13px; color: #7dbf7d; opacity: 0; transition: opacity 0.3s; }
+        .save-msg.show { opacity: 1; }
+
+        .menu-category-block { border: 1px solid #333; border-radius: 6px; padding: 20px; margin-bottom: 24px; }
+        .menu-category-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 10px; }
+        .menu-category-head input { flex: 1; background: #222; border: 1px solid #444; color: #fff; padding: 9px 12px; border-radius: 4px; font-size: 15px; font-weight: 600; }
+        .icon-btn { background: transparent; border: 1px solid #444; color: #999; width: 32px; height: 32px; border-radius: 4px; cursor: pointer; font-size: 15px; flex-shrink: 0; }
+        .icon-btn:hover { border-color: #e06565; color: #e06565; }
+        .icon-btn.add-btn:hover { border-color: #7dbf7d; color: #7dbf7d; }
+
+        .menu-item-row { display: grid; grid-template-columns: 1.3fr 1.6fr 0.7fr 0.6fr auto auto; gap: 8px; align-items: center; margin-bottom: 10px; }
+        .menu-item-row input[type="text"], .menu-item-row input[type="number"] { background: #1c1c1c; border: 1px solid #3a3a3a; color: #fff; padding: 8px 10px; border-radius: 4px; font-size: 13px; width: 100%; }
+        .menu-item-row .active-toggle { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #999; white-space: nowrap; }
+
+        .add-category-row { display: flex; gap: 10px; margin-top: 10px; }
+        .add-category-row input { flex: 1; background: #1c1c1c; border: 1px dashed #444; color: #fff; padding: 10px 12px; border-radius: 4px; font-size: 13px; }
+        .add-category-row button { background: transparent; border: 1px solid #c9a876; color: #c9a876; padding: 0 18px; border-radius: 4px; font-size: 13px; cursor: pointer; }
+
+        .col-label { font-size: 10px; color: #666; letter-spacing: 0.5px; text-transform: uppercase; }
+        .menu-col-header { display: grid; grid-template-columns: 1.3fr 1.6fr 0.7fr 0.6fr auto auto; gap: 8px; margin-bottom: 8px; }
+
+        @media (max-width: 700px) {
+            .tab-content { padding: 20px; }
+            .menu-item-row { grid-template-columns: 1fr; }
+            .menu-col-header { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-screen" id="login-screen">
+        <div class="login-box">
+            <div class="brand">DEER VALLEY PALM BEACH</div>
+            <h1>Yönetim Paneline Giriş</h1>
+            <input type="password" id="login-password" placeholder="Şifre" onkeydown="if(event.key==='Enter') tryLogin()">
+            <button onclick="tryLogin()">Giriş Yap</button>
+            <a href="index.html" class="login-site-link">← Ana Sayfaya (Siteye) Dön</a>
+            <div class="login-error" id="login-error"></div>
+        </div>
+    </div>
+
+    <div class="panel" id="panel">
+        <div class="panel-header">
+            <div class="brand">DEER VALLEY PALM BEACH &middot; YÖNETİM PANELİ</div>
+            <div class="panel-header-actions">
+                <a href="index.html" class="site-link" target="_blank">Siteye Git ↗</a>
+                <button class="logout-btn" onclick="logout()">Çıkış Yap</button>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="hero">Giriş Yazısı</button>
+            <button class="tab-btn" data-tab="story">Hakkımızda</button>
+            <button class="tab-btn" data-tab="contact">İletişim</button>
+            <button class="tab-btn" data-tab="menu">Menü</button>
+        </div>
+
+        <div class="tab-content">
+            <div class="tab-pane active" id="tab-hero">
+                <div class="field"><label>Ana Sayfa Giriş Metni</label><textarea id="hero-heading-input"></textarea></div>
+                <div class="field"><label>Buton Yazısı</label><input type="text" id="hero-button-input"></div>
+                <button class="save-btn" onclick="saveAllData('hero')">Kaydet</button>
+                <span class="save-msg" id="hero-save-msg">Kaydedildi ✓</span>
+            </div>
+
+            <div class="tab-pane" id="tab-story">
+                <div class="field"><label>Bölüm Başlığı</label><input type="text" id="story-title-input"></div>
+                <div class="field"><label>Hikâyemiz / Hakkımızda Metni</label><textarea id="story-text-input" style="min-height:140px;"></textarea></div>
+                <button class="save-btn" onclick="saveAllData('story')">Kaydet</button>
+                <span class="save-msg" id="story-save-msg">Kaydedildi ✓</span>
+            </div>
+
+            <div class="tab-pane" id="tab-contact">
+                <div class="field"><label>Adres</label><input type="text" id="contact-address-input"></div>
+                <div class="field"><label>Çalışma Saatleri</label><input type="text" id="contact-hours-input"></div>
+                <div class="field"><label>Telefon</label><input type="text" id="contact-phone-input"></div>
+                <div class="field"><label>E-posta</label><input type="text" id="contact-email-input"></div>
+                <button class="save-btn" onclick="saveAllData('contact')">Kaydet</button>
+                <span class="save-msg" id="contact-save-msg">Kaydedildi ✓</span>
+            </div>
+
+            <div class="tab-pane" id="tab-menu">
+                <div id="menu-categories-editor"></div>
+
+                <div class="add-category-row">
+                    <input type="text" id="new-category-name" placeholder="Yeni kategori adı (örn. Tatlılar)">
+                    <button onclick="addCategory()">+ Kategori Ekle</button>
+                </div>
+
+                <div style="margin-top:24px;">
+                    <button class="save-btn" onclick="saveAllData('menu')">Menüyü Kaydet</button>
+                    <span class="save-msg" id="menu-save-msg">Kaydedildi ✓</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_PASSWORD = "deervalley2026";
+        const SESSION_KEY = 'dv_admin_session';
+        const STORAGE_KEY = 'deer_valley_site_data';
+
+        let siteData = {
+            hero: { heading: "", buttonText: "" },
+            story: { title: "", text: "" },
+            contact: { address: "", hours: "", phone: "", email: "" },
+            menu: {
+                categories: [
+                    {
+                        id: "baslangiclar",
+                        name: "Başlangıçlar",
+                        items: [
+                            { name: "Zeytinyağlı Enginar", description: "Taze otlarla servis edilen zeytinyağlı enginar.", price: 250, active: true }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        function tryLogin() {
+            const input = document.getElementById('login-password');
+            const errorEl = document.getElementById('login-error');
+            if (input.value === ADMIN_PASSWORD) {
+                sessionStorage.setItem(SESSION_KEY, '1');
+                showPanel();
+            } else {
+                errorEl.textContent = 'Hatalı şifre, lütfen tekrar deneyin.';
+                input.value = '';
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem(SESSION_KEY);
+            document.getElementById('panel').classList.remove('visible');
+            document.getElementById('login-screen').style.display = 'flex';
+        }
+
+        function showPanel() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('panel').classList.add('visible');
+            
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try { 
+                    const parsed = JSON.parse(saved);
+                    if (parsed.contact) {
+                        parsed.contact = {
+                            address: parsed.contact.address || "",
+                            hours: parsed.contact.hours || "",
+                            phone: parsed.contact.phone || "",
+                            email: parsed.contact.email || ""
+                        };
+                    }
+                    siteData = parsed; 
+                } catch(e) {}
+            }
+
+            fillHeroForm();
+            fillStoryForm();
+            fillContactForm();
+            renderMenuEditor();
+        }
+
+        (function checkSession() {
+            if (sessionStorage.getItem(SESSION_KEY) === '1') {
+                showPanel();
+            }
+        })();
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        function flashSaved(id) {
+            const el = document.getElementById(id);
+            if(el) {
+                el.classList.add('show');
+                setTimeout(() => el.classList.remove('show'), 1800);
+            }
+        }
+
+        function fillHeroForm() {
+            document.getElementById('hero-heading-input').value = siteData.hero.heading || '';
+            document.getElementById('hero-button-input').value = siteData.hero.buttonText || '';
+        }
+
+        function fillStoryForm() {
+            document.getElementById('story-title-input').value = siteData.story.title || '';
+            document.getElementById('story-text-input').value = siteData.story.text || '';
+        }
+
+        function fillContactForm() {
+            const c = siteData.contact || {};
+            document.getElementById('contact-address-input').value = c.address || '';
+            document.getElementById('contact-hours-input').value = c.hours || '';
+            document.getElementById('contact-phone-input').value = c.phone || '';
+            document.getElementById('contact-email-input').value = c.email || '';
+        }
+
+        function saveAllData(section) {
+            if (section === 'hero') {
+                siteData.hero.heading = document.getElementById('hero-heading-input').value;
+                siteData.hero.buttonText = document.getElementById('hero-button-input').value;
+            } else if (section === 'story') {
+                siteData.story.title = document.getElementById('story-title-input').value;
+                siteData.story.text = document.getElementById('story-text-input').value;
+            } else if (section === 'contact') {
+                siteData.contact.address = document.getElementById('contact-address-input').value;
+                siteData.contact.hours = document.getElementById('contact-hours-input').value;
+                siteData.contact.phone = document.getElementById('contact-phone-input').value;
+                siteData.contact.email = document.getElementById('contact-email-input').value;
+            }
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(siteData));
+            flashSaved(section + '-save-msg');
+        }
+
+        function renderMenuEditor() {
+            const container = document.getElementById('menu-categories-editor');
+            const categories = siteData.menu.categories || [];
+
+            container.innerHTML = categories.map((cat, catIndex) => `
+                <div class="menu-category-block" data-cat-index="${catIndex}">
+                    <div class="menu-category-head">
+                        <input type="text" value="${escapeAttr(cat.name)}" onchange="updateCategoryName(${catIndex}, this.value)">
+                        <button class="icon-btn" title="Kategoriyi sil" onclick="deleteCategory(${catIndex})">✕</button>
+                    </div>
+
+                    <div class="menu-col-header">
+                        <div class="col-label">Ürün Adı</div>
+                        <div class="col-label">Açıklama</div>
+                        <div class="col-label">Fiyat (₺)</div>
+                        <div class="col-label">İndirim %</div>
+                        <div class="col-label">Aktif</div>
+                        <div class="col-label">Sil</div>
+                    </div>
+
+                    <div id="items-${catIndex}">
+                        ${(cat.items || []).map((item, itemIndex) => renderItemRow(catIndex, itemIndex, item)).join('')}
+                    </div>
+
+                    <button class="icon-btn add-btn" title="Ürün ekle" onclick="addItem(${catIndex})" style="margin-top:8px;">+</button>
+                </div>
+            `).join('');
+        }
+
+        function renderItemRow(catIndex, itemIndex, item) {
+            return `
+                <div class="menu-item-row" data-item-index="${itemIndex}">
+                    <input type="text" value="${escapeAttr(item.name)}" placeholder="Ürün adı"
+                        onchange="updateItemField(${catIndex}, ${itemIndex}, 'name', this.value)">
+                    <input type="text" value="${escapeAttr(item.description || '')}" placeholder="Açıklama"
+                        onchange="updateItemField(${catIndex}, ${itemIndex}, 'description', this.value)">
+                    <input type="number" value="${item.price || 0}" min="0" step="1"
+                        onchange="updateItemField(${catIndex}, ${itemIndex}, 'price', Number(this.value))">
+                    <div>
+                        <input type="number" value="${item.discountPercent || 0}" min="0" max="100" step="1"
+                            onchange="updateItemField(${catIndex}, ${itemIndex}, 'discountPercent', Number(this.value))">
+                    </div>
+                    <label class="active-toggle">
+                        <input type="checkbox" ${item.active !== false ? 'checked' : ''}
+                            onchange="updateItemField(${catIndex}, ${itemIndex}, 'active', this.checked)">
+                        Göster
+                    </label>
+                    <button class="icon-btn" title="Ürünü sil" onclick="deleteItem(${catIndex}, ${itemIndex})">✕</button>
+                </div>
+            `;
+        }
+
+        function escapeAttr(str) {
+            return (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+        }
+
+        function updateCategoryName(catIndex, value) {
+            siteData.menu.categories[catIndex].name = value;
+        }
+
+        function updateItemField(catIndex, itemIndex, field, value) {
+            siteData.menu.categories[catIndex].items[itemIndex][field] = value;
+        }
+
+        function addItem(catIndex) {
+            const newItem = {
+                name: 'Yeni Ürün',
+                description: '',
+                price: 0,
+                discountPercent: 0,
+                active: true
+            };
+            if (!siteData.menu.categories[catIndex].items) {
+                siteData.menu.categories[catIndex].items = [];
+            }
+            siteData.menu.categories[catIndex].items.push(newItem);
+            renderMenuEditor();
+        }
+
+        function deleteItem(catIndex, itemIndex) {
+            if (!confirm('Bu ürünü silmek istediğine emin misin?')) return;
+            siteData.menu.categories[catIndex].items.splice(itemIndex, 1);
+            renderMenuEditor();
+        }
+
+        function addCategory() {
+            const nameInput = document.getElementById('new-category-name');
+            const name = nameInput.value.trim();
+            if (!name) return;
+            siteData.menu.categories.push({
+                id: 'cat-' + Math.random().toString(36).substring(2, 7),
+                name: name,
+                items: []
+            });
+            nameInput.value = '';
+            renderMenuEditor();
+        }
+
+        function deleteCategory(catIndex) {
+            if (!confirm('Bu kategoriyi ve içindeki tüm ürünleri silmek istediğine emin misin?')) return;
+            siteData.menu.categories.splice(catIndex, 1);
+            renderMenuEditor();
+        }
+    </script>
+</body>
+</html>
