@@ -3,157 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menü | Deer Valley Palm Beach</title>
+    <title>Menü - Deer Valley Palm Beach</title>
     <link rel="icon" type="image/png" href="favicon.png">
 
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #0f0f0f;
+            background-color: #121212;
             color: #ffffff;
+            scroll-behavior: smooth;
         }
 
-        .back-bar {
-            position: sticky;
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Üst Header / Navigasyon */
+        header {
+            position: fixed;
             top: 0;
-            z-index: 100;
-            background: rgba(15, 15, 15, 0.95);
+            left: 0;
+            width: 100%;
+            background: rgba(18, 18, 18, 0.95);
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            padding: 16px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 15px 40px;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .back-link {
+        .back-home {
+            color: #aaa;
+            text-decoration: none;
+            font-size: 14px;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            color: #ccc;
-            text-decoration: none;
-            font-size: 13px;
-            letter-spacing: 0.5px;
             transition: color 0.3s;
         }
-        .back-link:hover { color: #fff; }
-        .back-bar .brand { font-size: 11px; letter-spacing: 3px; color: #c9a876; }
-
-        .menu-hero {
-            padding: 70px 24px 40px;
-            text-align: center;
-            background: linear-gradient(180deg, #1a1512 0%, #0f0f0f 100%);
+        .back-home:hover {
+            color: #fff;
         }
-        .menu-hero .eyebrow { font-size: 11px; letter-spacing: 4px; color: #c9a876; margin-bottom: 16px; text-transform: uppercase; }
-        .menu-hero h1 { font-size: 38px; font-weight: 400; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; }
-        .menu-hero p { font-size: 14px; color: #999; letter-spacing: 0.5px; }
-        .gold-divider { width: 44px; height: 1px; background: #c9a876; margin: 24px auto; }
-
-        .menu-content { max-width: 720px; margin: 0 auto; padding: 20px 24px 100px; }
-
-        .menu-nav {
-            display: flex;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            gap: 8px;
-            margin-bottom: 50px;
-            position: sticky;
-            top: 55px;
-            z-index: 90;
-            background: rgba(15,15,15,0.97);
-            padding: 14px 16px;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        /* Kaydırma çubuğunu gizleme */
-        .menu-nav::-webkit-scrollbar { display: none; }
-        .menu-nav { -ms-overflow-style: none; scrollbar-width: none; }
-
-        .menu-nav a {
-            flex-shrink: 0;
-            font-size: 11px;
-            letter-spacing: 1px;
-            color: #999;
-            text-decoration: none;
-            padding: 8px 14px;
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 30px;
-            transition: all 0.25s;
+        .brand-title {
+            font-size: 13px;
+            letter-spacing: 2px;
+            color: #888;
             text-transform: uppercase;
+        }
+
+        /* Menü Başlık Alanı */
+        .menu-hero {
+            padding: 140px 20px 40px 20px;
+            text-align: center;
+        }
+        .menu-hero h1 {
+            font-size: 38px;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .menu-hero p {
+            color: #aaa;
+            font-size: 15px;
+        }
+
+        /* Yeni Nesil Yatay Kaydırılabilir Kategori Sekmeleri */
+        .category-nav-wrapper {
+            position: sticky;
+            top: 71px;
+            background: rgba(18, 18, 18, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 999;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            margin-bottom: 40px;
+        }
+        .category-container {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE/Edge */
+            padding: 0 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .category-container::-webkit-scrollbar {
+            display: none; /* Chrome/Safari */
+        }
+        .cat-btn {
+            background: #1a1a1a;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #aaa;
+            padding: 10px 22px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 500;
             white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
-        .menu-nav a:hover, .menu-nav a.active { color: #0f0f0f; background: #c9a876; border-color: #c9a876; }
-
-        .menu-category { 
-            margin-bottom: 56px; 
+        .cat-btn:hover {
+            background: #252525;
+            color: #fff;
+            border-color: rgba(255,255,255,0.3);
         }
-        
-        .menu-category-title { font-size: 15px; letter-spacing: 4px; color: #c9a876; text-transform: uppercase; text-align: center; margin-bottom: 8px; }
-        .menu-category .gold-divider { margin: 12px auto 28px; }
+        .cat-btn.active {
+            background: #ffffff;
+            color: #121212;
+            border-color: #ffffff;
+            font-weight: 600;
+        }
 
+        /* Menü İçerik Alanı */
+        .menu-content {
+            padding-bottom: 100px;
+        }
+        .menu-category-section {
+            margin-bottom: 50px;
+        }
+        .menu-category-title {
+            font-size: 20px;
+            letter-spacing: 1.5px;
+            color: #dfdfdf;
+            margin-bottom: 25px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-transform: uppercase;
+        }
+
+        /* Ürün Kartları / Listesi */
+        .menu-items-grid {
+            display: grid;
+            gap: 20px;
+        }
         .menu-item {
             display: flex;
             justify-content: space-between;
             align-items: baseline;
-            gap: 20px;
-            padding: 16px 0;
-            border-bottom: 1px dotted rgba(255,255,255,0.12);
+            background: #171717;
+            padding: 18px 22px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.03);
+            transition: border-color 0.3s;
         }
-        .menu-item:last-child { border-bottom: none; }
-        .menu-item-left { flex: 1; }
-        .menu-item-name { font-size: 16px; font-weight: 500; margin-bottom: 4px; letter-spacing: 0.3px; }
-        .menu-item-desc { font-size: 13px; color: #888; line-height: 1.5; max-width: 420px; }
-        
-        .menu-item-price { font-size: 15px; color: #c9a876; font-weight: 600; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
-        .old-price { font-size: 13px; color: #888; text-decoration: line-through; font-weight: 400; }
-
-        .menu-footer {
-            text-align: center;
-            padding: 40px 24px 60px;
-            border-top: 1px solid rgba(255,255,255,0.08);
-            color: #777;
-            font-size: 12px;
-            letter-spacing: 0.5px;
+        .menu-item:hover {
+            border-color: rgba(255,255,255,0.15);
         }
-        .menu-footer a { color: #c9a876; text-decoration: none; }
+        .item-info {
+            max-width: 75%;
+        }
+        .item-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        .item-desc {
+            font-size: 13px;
+            color: #999;
+            line-height: 1.4;
+        }
+        .item-price {
+            font-size: 16px;
+            font-weight: 600;
+            color: #dfdfdf;
+        }
 
-        @media (max-width: 600px) {
+        /* Mobil Uyum */
+        @media (max-width: 768px) {
+            header { padding: 12px 20px; }
+            .brand-title { display: none; }
+            .menu-hero { padding-top: 120px; }
             .menu-hero h1 { font-size: 28px; }
-            .menu-nav { top: 53px; }
-            .menu-item { flex-direction: column; gap: 4px; }
-            .menu-item-price { align-self: flex-end; }
+            .category-container { padding: 0 15px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="back-bar" id="backBar">
-        <a href="index.html" class="back-link">
+    <!-- Üst Menü -->
+    <header>
+        <a href="index.html" class="back-home">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
             Ana Sayfa
         </a>
-        <div class="brand">DEER VALLEY PALM BEACH</div>
-    </div>
+        <div class="brand-title">Deer Valley Palm Beach</div>
+    </header>
 
+    <!-- Başlık -->
     <section class="menu-hero">
-        <div class="eyebrow">Deer Valley Palm Beach</div>
-        <h1>Menü</h1>
+        <h1>MENÜ</h1>
         <p>Deniz kenarında, gün batımı eşliğinde hazırlanan lezzetler</p>
-        <div class="gold-divider"></div>
     </section>
 
-    <div class="menu-content">
-        <div id="menu-container">
-            <p style="text-align:center; color:#777; padding:40px;">Menü yükleniyor...</p>
+    <!-- Modern Yatay Kategori Navigasyonu -->
+    <div class="category-nav-wrapper">
+        <div class="category-container" id="category-nav">
+            <!-- Kategoriler dinamik yüklenecek -->
         </div>
     </div>
 
-    <div class="menu-footer">
-        <p>Deer Valley Palm Beach &middot; <a href="index.html">Ana Sayfa</a></p>
+    <!-- Menü Ürünleri Listesi -->
+    <div class="container menu-content" id="menu-sections-container">
+        <!-- Ürünler dinamik yüklenecek -->
     </div>
 
-    <!-- Firebase SDK ve Menü Render Mantığı -->
+    <!-- Firebase Veri Entegrasyonu -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -172,102 +236,74 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        async function loadMenuFromFirebase() {
+        async function loadMenu() {
             try {
-                const snapshot = await get(ref(db, 'siteData/menu'));
+                const snapshot = await get(ref(db, 'menu'));
                 if (snapshot.exists()) {
-                    renderMenu(snapshot.val());
+                    const menuData = snapshot.val();
+                    renderMenu(menuData);
                 } else {
-                    document.getElementById('menu-container').innerHTML = '<p style="text-align:center; color:#777; padding:40px;">Henüz menü içeriği eklenmemiş.</p>';
+                    document.getElementById('menu-sections-container').innerHTML = '<p style="text-align:center; color:#777;">Henüz menü içeriği eklenmemiş.</p>';
                 }
             } catch (error) {
-                console.error("Firebase'den menü yüklenirken hata:", error);
-                document.getElementById('menu-container').innerHTML = '<p style="text-align:center; color:#e06565; padding:40px;">Menü yüklenirken bir sorun oluştu.</p>';
+                console.error("Menü yüklenirken hata oluştu:", error);
             }
         }
 
-        function renderMenu(menuData) {
-            let navHtml = '<nav class="menu-nav" id="menuNav">';
-            let contentHtml = '';
+        function renderMenu(data) {
+            const navContainer = document.getElementById('category-nav');
+            const contentContainer = document.getElementById('menu-sections-container');
+            
+            navContainer.innerHTML = '';
+            contentContainer.innerHTML = '';
 
-            if (menuData && menuData.categories && menuData.categories.length > 0) {
-                menuData.categories.forEach(category => {
-                    const catId = category.id || 'cat-' + Math.random().toString(36).substring(2, 7);
-                    navHtml += `<a href="#${catId}" class="nav-link" data-target="${catId}">${category.name}</a>`;
+            let isFirst = true;
 
-                    contentHtml += `
-                        <div id="${catId}" class="menu-category">
-                            <div class="menu-category-title">${category.name}</div>
-                            <div class="gold-divider"></div>
-                    `;
+            // data bir obje veya dizi olabilir, yapınıza göre uyarlanmıştır
+            Object.keys(data).forEach(catKey => {
+                const category = data[catKey];
+                const catId = `cat-${catKey}`;
+                
+                // Kategori Nav Butonu Oluşturma
+                const btn = document.createElement('button');
+                btn.className = `cat-btn ${isFirst ? 'active' : ''}`;
+                btn.textContent = category.name || catKey;
+                btn.onclick = () => {
+                    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.getElementById(catId).scrollIntoView({ behavior: 'smooth', block: 'start' });
+                };
+                navContainer.appendChild(btn);
 
-                    if (category.items && category.items.length > 0) {
-                        category.items.forEach(item => {
-                            if (item.active !== false) {
-                                const originalPrice = Number(item.price) || 0;
-                                const discountPercent = Number(item.discountPercent || 0);
-                                
-                                let priceHtml = '';
-                                if (discountPercent > 0) {
-                                    const discountedPrice = Math.round(originalPrice * (1 - discountPercent / 100));
-                                    priceHtml = `<span class="old-price">₺${originalPrice}</span> ₺${discountedPrice}`;
-                                } else {
-                                    priceHtml = `₺${originalPrice}`;
-                                }
+                // Kategori Bölümü ve Ürünler
+                const section = document.createElement('div');
+                section.className = 'menu-category-section';
+                section.id = catId;
 
-                                contentHtml += `
-                                    <div class="menu-item">
-                                        <div class="menu-item-left">
-                                            <div class="menu-item-name">${item.name}</div>
-                                            ${item.description ? `<div class="menu-item-desc">${item.description}</div>` : ''}
-                                        </div>
-                                        <div class="menu-item-price">${priceHtml}</div>
-                                    </div>
-                                `;
-                            }
-                        });
-                    }
+                let itemsHtml = `<h2 class="menu-category-title">${category.name || catKey}</h2><div class="menu-items-grid">`;
+                
+                if (category.items) {
+                    Object.values(category.items).forEach(item => {
+                        itemsHtml += `
+                            <div class="menu-item">
+                                <div class="item-info">
+                                    <div class="item-name">${item.name}</div>
+                                    ${item.description ? `<div class="item-desc">${item.description}</div>` : ''}
+                                </div>
+                                <div class="item-price">₺${item.price}</div>
+                            </div>
+                        `;
+                    });
+                }
+                itemsHtml += `</div>`;
+                section.innerHTML = itemsHtml;
+                contentContainer.appendChild(section);
 
-                    contentHtml += `</div>`;
-                });
-            } else {
-                contentHtml = '<p style="text-align:center; color:#777; padding:40px;">Henüz menü içeriği eklenmemiş.</p>';
-            }
-
-            navHtml += '</nav>';
-            document.getElementById('menu-container').innerHTML = navHtml + contentHtml;
-
-            // Dinamik Kaydırma Hesaplaması ve Yatay Kaydırma Senkronizasyonu
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const targetId = this.getAttribute('data-target');
-                    const targetElement = document.getElementById(targetId);
-                    
-                    if (targetElement) {
-                        const backBarHeight = document.getElementById('backBar').offsetHeight;
-                        const menuNavHeight = document.getElementById('menuNav').offsetHeight;
-                        const totalOffset = backBarHeight + menuNavHeight + 20; 
-
-                        const elementPosition = targetElement.getBoundingClientRect().top;
-                        const offsetPosition = elementPosition + window.pageYOffset - totalOffset;
-
-                        window.scrollTo({
-                            top: offsetPosition,
-                            behavior: 'smooth'
-                        });
-
-                        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-                        this.classList.add('active');
-
-                        // Tıklanan butonu yatay menünün ortasına kaydır
-                        this.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-                    }
-                });
+                isFirst = false;
             });
         }
 
-        document.addEventListener('DOMContentLoaded', loadMenuFromFirebase);
+        loadMenu();
     </script>
 </body>
 </html>
