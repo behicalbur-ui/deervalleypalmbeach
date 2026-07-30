@@ -61,7 +61,7 @@
 
         /* Menü Başlık Alanı */
         .menu-hero {
-            padding: 140px 20px 30px 20px;
+            padding: 130px 20px 25px 20px;
             text-align: center;
         }
         .menu-hero h1 {
@@ -75,39 +75,33 @@
             font-size: 15px;
         }
 
-        /* Yeni Nesil Yatay Kaydırılabilir Kategori Sekmeleri */
+        /* Sabit İki Sıralı Kategori Alanı */
         .category-nav-wrapper {
             position: sticky;
             top: 71px;
             background: rgba(18, 18, 18, 0.95);
             backdrop-filter: blur(10px);
             z-index: 999;
-            padding: 15px 0;
+            padding: 15px 20px;
             border-bottom: 1px solid rgba(255,255,255,0.08);
             margin-bottom: 40px;
         }
         .category-container {
             display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-            padding: 0 20px;
-            max-width: 900px;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            max-width: 850px;
             margin: 0 auto;
-        }
-        .category-container::-webkit-scrollbar {
-            display: none;
         }
         .cat-btn {
             background: #1a1a1a;
             border: 1px solid rgba(255,255,255,0.1);
             color: #aaa;
-            padding: 10px 22px;
+            padding: 9px 18px;
             border-radius: 30px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
-            white-space: nowrap;
             cursor: pointer;
             transition: all 0.3s ease;
         }
@@ -129,7 +123,7 @@
         }
         .menu-category-section {
             margin-bottom: 50px;
-            scroll-margin-top: 150px;
+            scroll-margin-top: 170px; /* Sekmeler iki sıra olduğu için üst boşluk payı */
         }
         .menu-category-title {
             font-size: 20px;
@@ -183,9 +177,10 @@
         @media (max-width: 768px) {
             header { padding: 12px 20px; }
             .brand-title { display: none; }
-            .menu-hero { padding-top: 120px; }
+            .menu-hero { padding-top: 110px; }
             .menu-hero h1 { font-size: 28px; }
-            .category-container { padding: 0 15px; }
+            .category-container { gap: 8px; }
+            .cat-btn { padding: 7px 14px; font-size: 12px; }
         }
     </style>
 </head>
@@ -206,7 +201,7 @@
         <p>Deniz kenarında, gün batımı eşliğinde hazırlanan lezzetler</p>
     </section>
 
-    <!-- Yatay Kategori Navigasyonu -->
+    <!-- İki Sıralı Sabit Kategori Navigasyonu -->
     <div class="category-nav-wrapper">
         <div class="category-container" id="category-nav"></div>
     </div>
@@ -256,8 +251,6 @@
             contentContainer.innerHTML = '';
 
             let isFirst = true;
-
-            // Firebase'deki array veya object yapılarını esnek şekilde destekler
             const categories = Array.isArray(data) ? data.filter(Boolean) : Object.values(data);
 
             if (categories.length === 0) {
@@ -271,7 +264,7 @@
                 const catName = category.name || `Kategori ${index + 1}`;
                 const catId = `cat-${index}`;
                 
-                // Kategori Nav Butonu
+                // Kategori Nav Butonu (İki sırada esnek yerleşim)
                 const btn = document.createElement('button');
                 btn.className = `cat-btn ${isFirst ? 'active' : ''}`;
                 btn.textContent = catName;
