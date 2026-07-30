@@ -21,6 +21,15 @@
             scroll-behavior: smooth;
         }
 
+        /* Firebase'den veri gelene kadar içeriği gizleyen sınıf */
+        .firebase-content {
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
+        }
+        .firebase-content.loaded {
+            opacity: 1;
+        }
+
         /* Ortak İçerik Genişliği - Tüm bölümler artık aynı hizada olacak */
         .container {
             max-width: 1200px;
@@ -373,8 +382,8 @@
 
     <!-- Hero / Giriş -->
     <section id="anasayfa" class="hero">
-        <h1 id="site-hero-heading">Gün batımının en güzel tonu, denizin huzuru ve dostlarla kurulan en keyifli sofralar...<br>Deer Valley Palm Beach’te deniz kenarında unutulmaz bir atmosfer sizi bekliyor. 🌊</h1>
-        <a href="#rezervasyon" class="reservation-btn" id="site-hero-btn">
+        <h1 id="site-hero-heading" class="firebase-content">Gün batımının en güzel tonu, denizin huzuru ve dostlarla kurulan en keyifli sofralar...<br>Deer Valley Palm Beach’te deniz kenarında unutulmaz bir atmosfer sizi bekliyor. 🌊</h1>
+        <a href="#rezervasyon" class="reservation-btn firebase-content" id="site-hero-btn">
             Rezervasyon Yap
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#121212" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
         </a>
@@ -383,8 +392,8 @@
     <!-- Hikâyemiz / Hakkımızda -->
     <section id="hikaye" class="story-section">
         <div class="container">
-            <h2 class="section-title" id="site-story-title">Hakkımızda</h2>
-            <div id="site-story-content">
+            <h2 class="section-title firebase-content" id="site-story-title">Hakkımızda</h2>
+            <div id="site-story-content" class="firebase-content">
                 <p class="lead">Bazı yerler sadece gidilen bir mekândır.<br>Bazı yerler ise hatırlanan anıların başlangıcı…</p>
                 <p>Palm Beach, Erdek Ocaklar sahilinde denizin huzurunu, gün batımının büyüsünü, lezzetin sıcaklığını ve müziğin ritmini aynı atmosferde buluşturan bir yaşam alanıdır. Burada zaman biraz daha yavaş akar, sohbetler biraz daha uzar, gün batımı biraz daha güzel görünür.</p>
                 <p>Sabahın ilk kahvesinden güne eşlik eden ferahlatıcı içeceklere, özenle hazırlanan lezzetlerden Palm Beach'e özel imza kokteyllere kadar her detay; sadece bir menü sunmak için değil, unutulmayacak anılar oluşturmak için düşünülür.</p>
@@ -465,10 +474,10 @@
             <div class="footer-grid">
                 <div class="footer-info">
                     <h3>İletişim & Konum</h3>
-                    <p><strong>Adres:</strong> <span id="site-address">Ocaklar, Akasya Sokak No:17, Ocaklar, Balıkesir, 10530</span></p>
-                    <p><strong>Çalışma Saatleri:</strong> <span id="site-hours">Pzt - Paz: 09.00 – 00.00</span></p>
-                    <p><strong>Telefon:</strong> <span id="site-phone">+90 541 971 00 14</span></p>
-                    <p><strong>E-posta:</strong> <span id="site-email">bilgi@deervalleypalmbeach.com</span></p>
+                    <p><strong>Adres:</strong> <span id="site-address" class="firebase-content">Ocaklar, Akasya Sokak No:17, Ocaklar, Balıkesir, 10530</span></p>
+                    <p><strong>Çalışma Saatleri:</strong> <span id="site-hours" class="firebase-content">Pzt - Paz: 09.00 – 00.00</span></p>
+                    <p><strong>Telefon:</strong> <span id="site-phone" class="firebase-content">+90 541 971 00 14</span></p>
+                    <p><strong>E-posta:</strong> <span id="site-email" class="firebase-content">bilgi@deervalleypalmbeach.com</span></p>
 
                     <div class="contact-action-buttons">
                         <a href="tel:+905419710014" class="action-btn">
@@ -546,6 +555,11 @@
                 }
             } catch (error) {
                 console.error("Firebase verileri yüklenirken hata oluştu:", error);
+            } finally {
+                // Veriler çekilsin veya hata alınsın, gizlenen tüm alanları yumuşakça görünür yap
+                document.querySelectorAll('.firebase-content').forEach(el => {
+                    el.classList.add('loaded');
+                });
             }
         }
 
