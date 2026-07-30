@@ -61,7 +61,7 @@
 
         /* Menü Başlık Alanı */
         .menu-hero {
-            padding: 130px 20px 25px 20px;
+            padding: 130px 20px 20px 20px;
             text-align: center;
         }
         .menu-hero h1 {
@@ -123,7 +123,7 @@
         }
         .menu-category-section {
             margin-bottom: 50px;
-            scroll-margin-top: 170px; /* Sekmeler iki sıra olduğu için üst boşluk payı */
+            scroll-margin-top: 170px;
         }
         .menu-category-title {
             font-size: 20px;
@@ -250,21 +250,26 @@
             navContainer.innerHTML = '';
             contentContainer.innerHTML = '';
 
-            let isFirst = true;
-            const categories = Array.isArray(data) ? data.filter(Boolean) : Object.values(data);
+            // Firebase'den gelen verinin dizi mi yoksa obje mi olduğunu tam kavrayıp kategorileri güvenle çekiyoruz
+            let categories = [];
+            if (Array.isArray(data)) {
+                categories = data.filter(Boolean);
+            } else if (data && typeof data === 'object') {
+                categories = Object.values(data).filter(Boolean);
+            }
 
             if (categories.length === 0) {
                 contentContainer.innerHTML = '<p style="text-align:center; color:#777;">Henüz menü içeriği eklenmemiş.</p>';
                 return;
             }
 
+            let isFirst = true;
+
             categories.forEach((category, index) => {
-                if (!category) return;
-                
                 const catName = category.name || `Kategori ${index + 1}`;
                 const catId = `cat-${index}`;
                 
-                // Kategori Nav Butonu (İki sırada esnek yerleşim)
+                // Kategori Nav Butonu (İki sırada düzenli görünüm)
                 const btn = document.createElement('button');
                 btn.className = `cat-btn ${isFirst ? 'active' : ''}`;
                 btn.textContent = catName;
@@ -283,7 +288,12 @@
                 let itemsHtml = `<h2 class="menu-category-title">${catName}</h2><div class="menu-items-grid">`;
                 
                 if (category.items) {
-                    const items = Array.isArray(category.items) ? category.items.filter(Boolean) : Object.values(category.items);
+                    let items = [];
+                    if (Array.isArray(category.items)) {
+                        items = category.items.filter(Boolean);
+                    } else if (typeof category.items === 'object') {
+                        items = Object.values(category.items).filter(Boolean);
+                    }
                     
                     items.forEach(item => {
                         itemsHtml += `
