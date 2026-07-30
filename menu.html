@@ -61,7 +61,7 @@
 
         /* Menü Başlık Alanı */
         .menu-hero {
-            padding: 140px 20px 40px 20px;
+            padding: 140px 20px 30px 20px;
             text-align: center;
         }
         .menu-hero h1 {
@@ -90,14 +90,14 @@
             display: flex;
             gap: 12px;
             overflow-x: auto;
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE/Edge */
+            scrollbar-width: none;
+            -ms-overflow-style: none;
             padding: 0 20px;
             max-width: 900px;
             margin: 0 auto;
         }
         .category-container::-webkit-scrollbar {
-            display: none; /* Chrome/Safari */
+            display: none;
         }
         .cat-btn {
             background: #1a1a1a;
@@ -129,6 +129,7 @@
         }
         .menu-category-section {
             margin-bottom: 50px;
+            scroll-margin-top: 150px;
         }
         .menu-category-title {
             font-size: 20px;
@@ -140,7 +141,7 @@
             text-transform: uppercase;
         }
 
-        /* Ürün Kartları / Listesi */
+        /* Ürün Kartları */
         .menu-items-grid {
             display: grid;
             gap: 20px;
@@ -205,17 +206,13 @@
         <p>Deniz kenarında, gün batımı eşliğinde hazırlanan lezzetler</p>
     </section>
 
-    <!-- Modern Yatay Kategori Navigasyonu -->
+    <!-- Yatay Kategori Navigasyonu -->
     <div class="category-nav-wrapper">
-        <div class="category-container" id="category-nav">
-            <!-- Kategoriler dinamik yüklenecek -->
-        </div>
+        <div class="category-container" id="category-nav"></div>
     </div>
 
     <!-- Menü Ürünleri Listesi -->
-    <div class="container menu-content" id="menu-sections-container">
-        <!-- Ürünler dinamik yüklenecek -->
-    </div>
+    <div class="container menu-content" id="menu-sections-container"></div>
 
     <!-- Firebase Veri Entegrasyonu -->
     <script type="module">
@@ -247,6 +244,7 @@
                 }
             } catch (error) {
                 console.error("Menü yüklenirken hata oluştu:", error);
+                document.getElementById('menu-sections-container').innerHTML = '<p style="text-align:center; color:#ff6b6b;">Menü yüklenirken bir hata oluştu.</p>';
             }
         }
 
@@ -259,15 +257,24 @@
 
             let isFirst = true;
 
-            // data bir obje veya dizi olabilir, yapınıza göre uyarlanmıştır
-            Object.keys(data).forEach(catKey => {
-                const category = data[catKey];
-                const catId = `cat-${catKey}`;
+            // Firebase'deki array veya object yapılarını esnek şekilde destekler
+            const categories = Array.isArray(data) ? data.filter(Boolean) : Object.values(data);
+
+            if (categories.length === 0) {
+                contentContainer.innerHTML = '<p style="text-align:center; color:#777;">Henüz menü içeriği eklenmemiş.</p>';
+                return;
+            }
+
+            categories.forEach((category, index) => {
+                if (!category) return;
                 
-                // Kategori Nav Butonu Oluşturma
+                const catName = category.name || `Kategori ${index + 1}`;
+                const catId = `cat-${index}`;
+                
+                // Kategori Nav Butonu
                 const btn = document.createElement('button');
                 btn.className = `cat-btn ${isFirst ? 'active' : ''}`;
-                btn.textContent = category.name || catKey;
+                btn.textContent = catName;
                 btn.onclick = () => {
                     document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
@@ -280,21 +287,24 @@
                 section.className = 'menu-category-section';
                 section.id = catId;
 
-                let itemsHtml = `<h2 class="menu-category-title">${category.name || catKey}</h2><div class="menu-items-grid">`;
+                let itemsHtml = `<h2 class="menu-category-title">${catName}</h2><div class="menu-items-grid">`;
                 
                 if (category.items) {
-                    Object.values(category.items).forEach(item => {
+                    const items = Array.isArray(category.items) ? category.items.filter(Boolean) : Object.values(category.items);
+                    
+                    items.forEach(item => {
                         itemsHtml += `
                             <div class="menu-item">
                                 <div class="item-info">
-                                    <div class="item-name">${item.name}</div>
+                                    <div class="item-name">${item.name || ''}</div>
                                     ${item.description ? `<div class="item-desc">${item.description}</div>` : ''}
                                 </div>
-                                <div class="item-price">₺${item.price}</div>
+                                <div class="item-price">₺${item.price || '0'}</div>
                             </div>
                         `;
                     });
                 }
+                
                 itemsHtml += `</div>`;
                 section.innerHTML = itemsHtml;
                 contentContainer.appendChild(section);
