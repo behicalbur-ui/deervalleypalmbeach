@@ -207,7 +207,9 @@
     </div>
 
     <!-- Menü Ürünleri Listesi -->
-    <div class="container menu-content" id="menu-sections-container"></div>
+    <div class="container menu-content" id="menu-sections-container">
+        <p style="text-align:center; color:#777;">Menü yükleniyor...</p>
+    </div>
 
     <!-- Firebase Veri Entegrasyonu -->
     <script type="module">
@@ -231,15 +233,17 @@
         async function loadMenu() {
             try {
                 const snapshot = await get(ref(db, 'menu'));
+                console.log("Firebase Ham Veri (Snapshot):", snapshot.val());
+
                 if (snapshot.exists()) {
                     const menuData = snapshot.val();
                     renderMenu(menuData);
                 } else {
-                    document.getElementById('menu-sections-container').innerHTML = '<p style="text-align:center; color:#777;">Henüz menü içeriği eklenmemiş.</p>';
+                    document.getElementById('menu-sections-container').innerHTML = '<p style="text-align:center; color:#ff6b6b;">Firebase üzerinde 'menu' düğümü boş veya bulunamadı.</p>';
                 }
             } catch (error) {
-                console.error("Menü yüklenirken hata oluştu:", error);
-                document.getElementById('menu-sections-container').innerHTML = '<p style="text-align:center; color:#ff6b6b;">Menü yüklenirken bir hata oluştu.</p>';
+                console.error("Firebase bağlantı hatası:", error);
+                document.getElementById('menu-sections-container').innerHTML = `<p style="text-align:center; color:#ff6b6b;">Hata: ${error.message}</p>`;
             }
         }
 
@@ -250,7 +254,6 @@
             navContainer.innerHTML = '';
             contentContainer.innerHTML = '';
 
-            // Firebase'den gelen verinin dizi mi yoksa obje mi olduğunu tam kavrayıp kategorileri güvenle çekiyoruz
             let categories = [];
             if (Array.isArray(data)) {
                 categories = data.filter(Boolean);
@@ -258,18 +261,19 @@
                 categories = Object.values(data).filter(Boolean);
             }
 
+            console.log("İşlenen Kategoriler:", categories);
+
             if (categories.length === 0) {
-                contentContainer.innerHTML = '<p style="text-align:center; color:#777;">Henüz menü içeriği eklenmemiş.</p>';
+                contentContainer.innerHTML = '<p style="text-align:center; color:#777;">Gösterilecek kategori bulunamadı.</p>';
                 return;
             }
 
             let isFirst = true;
 
             categories.forEach((category, index) => {
-                const catName = category.name || `Kategori ${index + 1}`;
+                const catName = category.name || category.kategoriAdi || `Kategori ${index + 1}`;
                 const catId = `cat-${index}`;
                 
-                // Kategori Nav Butonu (İki sırada düzenli görünüm)
                 const btn = document.createElement('button');
                 btn.className = `cat-btn ${isFirst ? 'active' : ''}`;
                 btn.textContent = catName;
@@ -280,7 +284,6 @@
                 };
                 navContainer.appendChild(btn);
 
-                // Kategori Bölümü ve Ürünler
                 const section = document.createElement('div');
                 section.className = 'menu-category-section';
                 section.id = catId;
@@ -299,10 +302,10 @@
                         itemsHtml += `
                             <div class="menu-item">
                                 <div class="item-info">
-                                    <div class="item-name">${item.name || ''}</div>
-                                    ${item.description ? `<div class="item-desc">${item.description}</div>` : ''}
+                                    <div class="item-name">${item.name || item.urunAdi || ''}</div>
+                                    ${item.description || item.aciklama ? `<div class="item-desc">${item.description || item.aciklama}</div>` : ''}
                                 </div>
-                                <div class="item-price">₺${item.price || '0'}</div>
+                                <div class="item-price">₺${item.price || item.fiyat || '0'}</div>
                             </div>
                         `;
                     });
