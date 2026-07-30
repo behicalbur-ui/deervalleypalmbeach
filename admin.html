@@ -149,64 +149,62 @@
         </div>
     </div>
 
-    <script>
+    <!-- Firebase SDK ve Veri Yönetimi -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBz2YSZx5wBCs9eM4FCqxovO4rHhqworBw",
+            authDomain: "deer-valley-palm-beach.firebaseapp.com",
+            databaseURL: "https://deer-valley-palm-beach-default-rtdb.firebaseio.com",
+            projectId: "deer-valley-palm-beach",
+            storageBucket: "deer-valley-palm-beach.firebasestorage.app",
+            messagingSenderId: "1044470367747",
+            appId: "1:1044470367747:web:b18af2195cf35c3856f036",
+            measurementId: "G-1MNYDFTSRJ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
         const ADMIN_PASSWORD = "deervalley2026";
         const SESSION_KEY = 'dv_admin_session';
-        const STORAGE_KEY = 'deer_valley_site_data';
 
         let siteData = {
             hero: { heading: "", buttonText: "" },
             story: { title: "", text: "" },
             contact: { address: "", hours: "", phone: "", email: "" },
-            menu: {
-                categories: [
-                    {
-                        id: "baslangiclar",
-                        name: "Başlangıçlar",
-                        items: [
-                            { name: "Zeytinyağlı Enginar", description: "Taze otlarla servis edilen zeytinyağlı enginar.", price: 250, active: true }
-                        ]
-                    }
-                ]
-            }
+            menu: { categories: [] }
         };
 
-        function tryLogin() {
+        window.tryLogin = async function() {
             const input = document.getElementById('login-password');
             const errorEl = document.getElementById('login-error');
             if (input.value === ADMIN_PASSWORD) {
                 sessionStorage.setItem(SESSION_KEY, '1');
-                showPanel();
+                await initializePanelData();
+                showPanelUI();
             } else {
                 errorEl.textContent = 'Hatalı şifre, lütfen tekrar deneyin.';
                 input.value = '';
             }
-        }
+        };
 
-        function logout() {
+        window.logout = function() {
             sessionStorage.removeItem(SESSION_KEY);
             document.getElementById('panel').classList.remove('visible');
             document.getElementById('login-screen').style.display = 'flex';
-        }
+        };
 
-        function showPanel() {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('panel').classList.add('visible');
-            
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) {
-                try { 
-                    const parsed = JSON.parse(saved);
-                    if (parsed.contact) {
-                        parsed.contact = {
-                            address: parsed.contact.address || "",
-                            hours: parsed.contact.hours || "",
-                            phone: parsed.contact.phone || "",
-                            email: parsed.contact.email || ""
-                        };
-                    }
-                    siteData = parsed; 
-                } catch(e) {}
+        async function initializePanelData() {
+            try {
+                const snapshot = await get(ref(db, 'siteData'));
+                if (snapshot.exists()) {
+                    siteData = snapshot.val();
+                }
+            } catch (error) {
+                console.error("Firebase'den veri çekerken hata:", error);
             }
 
             fillHeroForm();
@@ -215,11 +213,17 @@
             renderMenuEditor();
         }
 
-        (function checkSession() {
-            if (sessionStorage.getItem(SESSION_KEY) === '1') {
-                showPanel();
-            }
-        })();
+        function showPanelUI() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('panel').classList.add('visible');
+        }
+
+        // Oturum kontrolü
+        if (sessionStorage.getItem(SESSION_KEY) === '1') {
+            initializePanelData().then(() => {
+                showPanelUI();
+            });
+        }
 
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -239,11 +243,13 @@
         }
 
         function fillHeroForm() {
+            if(!siteData.hero) siteData.hero = {};
             document.getElementById('hero-heading-input').value = siteData.hero.heading || '';
             document.getElementById('hero-button-input').value = siteData.hero.buttonText || '';
         }
 
         function fillStoryForm() {
+            if(!siteData.story) siteData.story = {};
             document.getElementById('story-title-input').value = siteData.story.title || '';
             document.getElementById('story-text-input').value = siteData.story.text || '';
         }
@@ -256,27 +262,39 @@
             document.getElementById('contact-email-input').value = c.email || '';
         }
 
-        function saveAllData(section) {
+        window.saveAllData = async function(section) {
             if (section === 'hero') {
+                if(!siteData.hero) siteData.hero = {};
                 siteData.hero.heading = document.getElementById('hero-heading-input').value;
                 siteData.hero.buttonText = document.getElementById('hero-button-input').value;
             } else if (section === 'story') {
+                if(!siteData.story) siteData.story = {};
                 siteData.story.title = document.getElementById('story-title-input').value;
                 siteData.story.text = document.getElementById('story-text-input').value;
             } else if (section === 'contact') {
+                if(!siteData.contact) siteData.contact = {};
                 siteData.contact.address = document.getElementById('contact-address-input').value;
                 siteData.contact.hours = document.getElementById('contact-hours-input').value;
                 siteData.contact.phone = document.getElementById('contact-phone-input').value;
                 siteData.contact.email = document.getElementById('contact-email-input').value;
+            } else if (section === 'menu') {
+                // Menü verileri zaten anlık olarak nesne içinde güncelleniyor
             }
 
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(siteData));
-            flashSaved(section + '-save-msg');
-        }
+            try {
+                await set(ref(db, 'siteData'), siteData);
+                flashSaved(section + '-save-msg');
+            } catch (error) {
+                alert("Kaydedilirken bir hata oluştu: " + error.message);
+            }
+        };
 
-        function renderMenuEditor() {
+        window.renderMenuEditor = function() {
             const container = document.getElementById('menu-categories-editor');
-            const categories = siteData.menu.categories || [];
+            if(!siteData.menu || !siteData.menu.categories) {
+                siteData.menu = { categories: [] };
+            }
+            const categories = siteData.menu.categories;
 
             container.innerHTML = categories.map((cat, catIndex) => `
                 <div class="menu-category-block" data-cat-index="${catIndex}">
@@ -301,7 +319,7 @@
                     <button class="icon-btn add-btn" title="Ürün ekle" onclick="addItem(${catIndex})" style="margin-top:8px;">+</button>
                 </div>
             `).join('');
-        }
+        };
 
         function renderItemRow(catIndex, itemIndex, item) {
             return `
@@ -330,15 +348,15 @@
             return (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
         }
 
-        function updateCategoryName(catIndex, value) {
+        window.updateCategoryName = function(catIndex, value) {
             siteData.menu.categories[catIndex].name = value;
-        }
+        };
 
-        function updateItemField(catIndex, itemIndex, field, value) {
+        window.updateItemField = function(catIndex, itemIndex, field, value) {
             siteData.menu.categories[catIndex].items[itemIndex][field] = value;
-        }
+        };
 
-        function addItem(catIndex) {
+        window.addItem = function(catIndex) {
             const newItem = {
                 name: 'Yeni Ürün',
                 description: '',
@@ -351,18 +369,21 @@
             }
             siteData.menu.categories[catIndex].items.push(newItem);
             renderMenuEditor();
-        }
+        };
 
-        function deleteItem(catIndex, itemIndex) {
+        window.deleteItem = function(catIndex, itemIndex) {
             if (!confirm('Bu ürünü silmek istediğine emin misin?')) return;
             siteData.menu.categories[catIndex].items.splice(itemIndex, 1);
             renderMenuEditor();
-        }
+        };
 
-        function addCategory() {
+        window.addCategory = function() {
             const nameInput = document.getElementById('new-category-name');
             const name = nameInput.value.trim();
             if (!name) return;
+            if(!siteData.menu) siteData.menu = { categories: [] };
+            if(!siteData.menu.categories) siteData.menu.categories = [];
+            
             siteData.menu.categories.push({
                 id: 'cat-' + Math.random().toString(36).substring(2, 7),
                 name: name,
@@ -370,13 +391,13 @@
             });
             nameInput.value = '';
             renderMenuEditor();
-        }
+        };
 
-        function deleteCategory(catIndex) {
+        window.deleteCategory = function(catIndex) {
             if (!confirm('Bu kategoriyi ve içindeki tüm ürünleri silmek istediğine emin misin?')) return;
             siteData.menu.categories.splice(catIndex, 1);
             renderMenuEditor();
-        }
+        };
     </script>
 </body>
 </html>
